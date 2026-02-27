@@ -2,8 +2,10 @@
 
 # imports
 import asyncio
+# pip install google-genai
 from google import genai
 
+# pip install rich
 from rich.console import Console
 from rich.markdown import Markdown
 
@@ -11,9 +13,10 @@ from rich.markdown import Markdown
 history = 6
 memory = []
 
+# generate a response from google api
 async def generate(prompt):
 
-    client = genai.Client(api_key=)
+    client = genai.Client(api_key="")
 
     response = await client.aio.models.generate_content(
         model="gemma-3-27b-it",
@@ -22,6 +25,7 @@ async def generate(prompt):
     
     return response.text
 
+# format the text
 def pretty_print(text):
 
     console = Console()
@@ -29,15 +33,22 @@ def pretty_print(text):
 
     console.print(markdown)
 
+# run the program
 if __name__ == "__main__":
     
     while prompt := input(">>> "):
-        
-        memory.append(prompt)
-        memory = memory[-history:]
-        
-        response = asyncio.run(generate(f"<SYSTEM MESSAGE>\nKeep responses brief, use markdown formatting\n<CURRENT CONVERSATION>:\n{"\n".join(memory)}\n<LATEST USER MESSAGE>:\n{prompt}"))
-        
-        memory.append(response)
+        try:
+            memory.append(prompt)
+            memory = memory[-history:]
+            
+            response = asyncio.run(
+                generate(
+                    f"<CURRENT CONVERSATION>:\n{"\n".join(memory)}\n<LATEST USER MESSAGE>:\n{prompt}"
+                )
+            )
+            
+            memory.append(response)
+            pretty_print(response)
 
-        pretty_print(response)
+        except Exception as error:
+            print(f"An error occured: {error}")
